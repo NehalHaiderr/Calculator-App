@@ -10,7 +10,7 @@ buttons.forEach((button) => {
         const lastChar = string.slice(-1);
 
         if (text === "%") {
-            string = string / 100;
+            string += "/100";
             userInput.value = string;
             return;
         }
@@ -31,7 +31,7 @@ buttons.forEach((button) => {
             try {
                 // guard: nothing to evaluate or trailing operator -> ignore or show error
                 if (!string) return;
-                if (isOperator.test(string)) {
+                if (/[*+\-\/%\.]$/.test(string)) {
                     userInput.value = "Error";
                     string = "";
                     return;
