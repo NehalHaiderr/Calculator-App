@@ -2,15 +2,56 @@ let string = "";
 let userInput = document.querySelector("#input-prompt");
 let buttons = document.querySelectorAll(".buttons");
 
+function safeCalculate(expr) {
+    // Prevent invalid characters
+    if (!/^[0-9+\-*/.%\s()]+$/.test(expr)) {
+        throw new Error("Invalid characters in expression");
+    }
+
+    // Convert % to /100 for math
+    expr = expr.replace(/%/g, "/100");
+
+    // Use Function() safely — only math allowed
+    const result = Function(`"use strict"; return (${expr})`)();
+
+    // Handle NaN or undefined results
+    if (isNaN(result) || result === undefined) {
+        throw new Error("Invalid expression");
+    }
+
+    return result;
+}
+
+
 buttons.forEach((button) => {
     button.addEventListener("click", (evt) => {
-        const btn = evt.currentTarget;               // the actual button element
-        const text = btn.innerText.trim();         // reliable button text
+        const btn = evt.currentTarget;
+        const text = btn.innerText.trim();
         const isOperator = /[+\-*\/%]/;
         const lastChar = string.slice(-1);
 
-        if (text === "%") {
-            string += "/100";
+        if (text === ".") {
+            if (!string || isOperator.test(lastChar)) {
+                string += "0.";
+                userInput.value = string;
+                return;
+            }
+
+            const lastOpIndex = Math.max(
+                string.lastIndexOf("+"),
+                string.lastIndexOf("-"),
+                string.lastIndexOf("*"),
+                string.lastIndexOf("/"),
+                string.lastIndexOf("%")
+            )
+
+            const currentNumber = string.slice(lastOpIndex + 1);
+
+            if (currentNumber.includes(".")) {
+                return;
+            }
+
+            string += "."
             userInput.value = string;
             return;
         }
@@ -27,71 +68,41 @@ buttons.forEach((button) => {
             return;
         }
 
+        if (text === "%") {
+            if (string && !/[+\-*/%]$/.test(string)) {
+                string = (parseFloat(eval(string)) / 100).toString();
+                userInput.value = string;
+            }
+            return;
+        }
+
         if (text === "=") {
             try {
-                // guard: nothing to evaluate or trailing operator -> ignore or show error
                 if (!string) return;
-                if (/[*+\-\/%\.]$/.test(string)) {
-                    userInput.value = "Error";
-                    string = "";
-                    return;
+
+                if (/[+\-*\/%]$/.test(string)) {
+                    throw new Error("Ends with operator");
                 }
 
-                // evaluate and keep numeric result for toFixed
-                const result = eval(string);
-                if (typeof result === "number" && isFinite(result)) {
-                    string = String(result);
-                    if (Number.isInteger(result)) {
-                        userInput.value = string;
-                    }
-
-                    else {
-                        userInput.value = result.toFixed(3).replace(/\.?0+$/, "");
-                    }
-                } else {
-                    // non-number result (e.g. undefined) — just show it
-                    string = String(result);
-                    userInput.value = string;
-                }
-            }
-            catch (err) {
-                userInput.value = "Error";
-                string = "";
-            }
-            return;
-        }
-
-        if (text === ".") {
-            if (!string || isOperator.test(lastChar)) {
-                string += "0.";
+                const result = safeCalculate(string);
+                string = result.toString();
                 userInput.value = string;
-                return;
             }
 
-            const lastOpIndex = Math.max(
-                string.lastIndexOf("+"),
-                string.lastIndexOf("-"),
-                string.lastIndexOf("*"),
-                string.lastIndexOf("/"),
-                string.lastIndexOf("%")
-            );
-            const currentNumber = string.slice(lastOpIndex + 1);
-            if (currentNumber.includes(".")) {
-                return;
+            catch (err) {
+                string = "";
+                userInput.value = "Error";
             }
-
-            string += ".";
-            userInput.value = string;
             return;
         }
 
-        // basic guard: don't append operator after another operator
         if (isOperator.test(text) && isOperator.test(lastChar)) {
-            // replace consecutive operator (e.g. allow change 5+ to 5-)
             string = string.slice(0, -1) + text;
-        } else {
+        }
+
+        else {
             string += text;
         }
         userInput.value = string;
     });
-})
+});
