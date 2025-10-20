@@ -8,9 +8,6 @@ function safeCalculate(expr) {
         throw new Error("Invalid characters in expression");
     }
 
-    // Convert % to /100
-    expr = expr.replace(/%/g, "/100");
-
     // Use Function for math only
     const result = Function(`"use strict"; return (${expr})`)();
 
@@ -65,13 +62,13 @@ function handleInput(text) {
     }
 
     // Percentage
-    // if (text === "%") {
-    //     if (string && !/[+\-*/%]$/.test(string)) {
-    //         string = (parseFloat(eval(string)) / 100).toString();
-    //         userInput.value = string;
-    //     }
-    //     return;
-    // }
+    if (text === "%") {
+        if (string && !/[+\-*/%]$/.test(string)) {
+            string = (parseFloat(eval(string)) / 100).toString();
+            userInput.value = string;
+        }
+        return;
+    }
 
     // Equals
     if (text === "=" || text === "Enter") {
