@@ -26,7 +26,6 @@ Simple browser-based calculator built with HTML, CSS and JavaScript.
 - JavaScript
 
 ## Notes
-- The evaluator uses `eval()` on the expression string in `app.js`. This is simple but can be unsafe if untrusted input is possible. For production, replace `eval` with a proper expression parser or sanitizer.
 - Percentage (%) currently divides the current expression by 100 when pressed.
 
 ---

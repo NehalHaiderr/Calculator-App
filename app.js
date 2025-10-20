@@ -2,9 +2,8 @@ let string = "";
 let userInput = document.querySelector("#input-prompt");
 let buttons = document.querySelectorAll(".buttons");
 
-// ✅ Safe math evaluator (no eval)
+// Safe math evaluator
 function safeCalculate(expr) {
-    // Allow only math-safe characters
     if (!/^[0-9+\-*/.%\s()]+$/.test(expr)) {
         throw new Error("Invalid characters in expression");
     }
@@ -12,7 +11,7 @@ function safeCalculate(expr) {
     // Convert % to /100
     expr = expr.replace(/%/g, "/100");
 
-    // Use Function safely for math only
+    // Use Function for math only
     const result = Function(`"use strict"; return (${expr})`)();
 
     if (isNaN(result) || result === undefined) {
@@ -22,7 +21,7 @@ function safeCalculate(expr) {
     return result;
 }
 
-// ✅ Main function for processing input (used by both clicks & keyboard)
+// Main function for processing input (used by both clicks & keyboard)
 function handleInput(text) {
     const isOperator = /[+\-*\/%]/;
     const lastChar = string.slice(-1);
@@ -65,13 +64,14 @@ function handleInput(text) {
         return;
     }
 
-    if (text === "%") {
-        if (string && !/[+\-*/%]$/.test(string)) {
-            string = (parseFloat(eval(string)) / 100).toString();
-            userInput.value = string;
-        }
-        return;
-    }
+    // Percentage
+    // if (text === "%") {
+    //     if (string && !/[+\-*/%]$/.test(string)) {
+    //         string = (parseFloat(eval(string)) / 100).toString();
+    //         userInput.value = string;
+    //     }
+    //     return;
+    // }
 
     // Equals
     if (text === "=" || text === "Enter") {
@@ -99,7 +99,7 @@ function handleInput(text) {
     userInput.value = string;
 }
 
-// ✅ Handle button clicks
+// Handle button clicks
 buttons.forEach((button) => {
     button.addEventListener("click", (evt) => {
         const text = evt.currentTarget.innerText.trim();
@@ -107,7 +107,7 @@ buttons.forEach((button) => {
     });
 });
 
-// ✅ Handle keyboard input
+// Handle keyboard input
 document.addEventListener("keydown", (evt) => {
     const key = evt.key;
 
